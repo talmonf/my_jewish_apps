@@ -1,0 +1,12 @@
+---
+description: Database script naming and tracking conventions
+alwaysApply: true
+---
+
+# Database Scripts
+
+- Put database scripts in `drizzle/` unless the existing project structure clearly requires a different location.
+- Name future database scripts with a two-digit sequence prefix, for example `00_add_users_table.sql` or `01_backfill_user_roles.sql`.
+- Every time a database script is created, add it to `drizzle/index_db.md` as an unchecked Markdown checklist item.
+- Keep `drizzle/index_db.md` sorted latest first.
+- The user will check off an item after running that script against the database; do not mark newly created scripts as run.

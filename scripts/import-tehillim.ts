@@ -1,0 +1,67 @@
+import { db } from "@/db";
+import { tehillimChapters, tehillimVerses } from "@/db/schema";
+import {
+  SAMPLE_TEHILLIM_VERSES,
+  TEHILLIM_CHAPTERS,
+  tokenizeHebrew,
+} from "@/lib/tehillim/metadata";
+
+type SefariaResponse = {
+  he?: string[];
+  text?: string[];
+};
+
+async function fetchSefariaChapter(chapter: number) {
+  const response = await fetch(
+    `https://www.sefaria.org/api/texts/Psalms.${chapter}?context=0`,
+  );
+
+  if (!response.ok) {
+    throw new Error(`Sefaria request failed for chapter ${chapter}.`);
+  }
+
+  const data = (await response.json()) as SefariaResponse;
+  return data.he?.map((hebrew, index) => ({
+    chapter,
+    verse: index + 1,
+    hebrew,
+    english: data.text?.[index],
+  }));
+}
+
+async function importTehillim() {
+  await db
+    .insert(tehillimChapters)
+    .values(TEHILLIM_CHAPTERS)
+    .onConflictDoNothing();
+
+  const importedVerses = [];
+
+  for (const chapter of TEHILLIM_CHAPTERS) {
+    try {
+      const verses = await fetchSefariaChapter(chapter.chapter);
+      importedVerses.push(...(verses ?? []));
+    } catch (error) {
+      console.warn(`Skipped chapter ${chapter.chapter}:`, error);
+    }
+  }
+
+  const verses = importedVerses.length > 0 ? importedVerses : SAMPLE_TEHILLIM_VERSES;
+
+  await db
+    .insert(tehillimVerses)
+    .values(
+      verses.map((verse) => ({
+        ...verse,
+        tokens: tokenizeHebrew(verse.hebrew),
+      })),
+    )
+    .onConflictDoNothing();
+
+  console.log(`Imported ${verses.length} Tehillim verses.`);
+}
+
+importTehillim().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
