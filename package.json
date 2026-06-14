@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "seed": "tsx scripts/seed.ts",
+    "create-admin": "tsx scripts/create-admin.ts",
     "import:tehillim": "tsx scripts/import-tehillim.ts"
   },
   "dependencies": {
