@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PasswordInput } from "@/components/PasswordInput";
 import { db } from "@/db";
 import { apps, defaultAppAccess, userAppAccess, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/access";
@@ -63,13 +64,12 @@ export default async function AdminPage() {
             required
             className="rounded-lg border border-slate-300 px-3 py-2"
           />
-          <input
+          <PasswordInput
+            containerClassName="min-w-0"
             name="password"
-            type="password"
             minLength={8}
             placeholder="Password"
             required
-            className="rounded-lg border border-slate-300 px-3 py-2"
           />
           <select
             name="role"

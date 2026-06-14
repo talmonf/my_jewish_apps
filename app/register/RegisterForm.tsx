@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import Link from "next/link";
 import { useActionState } from "react";
 
@@ -34,17 +35,14 @@ export function RegisterForm() {
           autoComplete="email"
         />
       </label>
-      <label className="block">
-        <span className="text-sm font-medium text-slate-700">Password</span>
-        <input
-          name="password"
-          type="password"
-          minLength={8}
-          required
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          autoComplete="new-password"
-        />
-      </label>
+      <PasswordInput
+        containerClassName="block"
+        label="Password"
+        name="password"
+        minLength={8}
+        required
+        autoComplete="new-password"
+      />
       {state.error ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           {state.error}

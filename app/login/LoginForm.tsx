@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/PasswordInput";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -49,16 +50,13 @@ export function LoginForm() {
           autoComplete="email"
         />
       </label>
-      <label className="block">
-        <span className="text-sm font-medium text-slate-700">Password</span>
-        <input
-          name="password"
-          type="password"
-          required
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          autoComplete="current-password"
-        />
-      </label>
+      <PasswordInput
+        containerClassName="block"
+        label="Password"
+        name="password"
+        required
+        autoComplete="current-password"
+      />
       {error ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
