@@ -1,5 +1,7 @@
 import "@/envConfig";
 
+import { sql } from "drizzle-orm";
+
 import { db } from "@/db";
 import { tehillimChapters, tehillimVerses } from "@/db/schema";
 import {
@@ -7,6 +9,7 @@ import {
   TEHILLIM_CHAPTERS,
   tokenizeHebrew,
 } from "@/lib/tehillim/metadata";
+import { normalizeSefariaText } from "@/lib/tehillim/sefaria";
 
 type SefariaResponse = {
   he?: string[];
@@ -26,8 +29,10 @@ async function fetchSefariaChapter(chapter: number) {
   return data.he?.map((hebrew, index) => ({
     chapter,
     verse: index + 1,
-    hebrew,
-    english: data.text?.[index],
+    hebrew: normalizeSefariaText(hebrew),
+    english: data.text?.[index]
+      ? normalizeSefariaText(data.text[index])
+      : undefined,
   }));
 }
 
@@ -62,7 +67,14 @@ async function importTehillim() {
         tokens: tokenizeHebrew(verse.hebrew),
       })),
     )
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [tehillimVerses.chapter, tehillimVerses.verse],
+      set: {
+        hebrew: sql`excluded.hebrew`,
+        english: sql`excluded.english`,
+        tokens: sql`excluded.tokens`,
+      },
+    });
 
   console.log(`Imported ${verses.length} Tehillim verses.`);
 }

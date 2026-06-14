@@ -13,6 +13,7 @@ import {
 } from "@/db/schema";
 import { requireAppAccess } from "@/lib/access";
 import { TEHILLIM_CHAPTERS } from "@/lib/tehillim/metadata";
+import { normalizeSefariaText } from "@/lib/tehillim/sefaria";
 
 import {
   addComment,
@@ -223,6 +224,10 @@ export default async function TehillimPage({ searchParams }: PageProps) {
         <div className="mt-8 space-y-5">
           {verses.length > 0 ? (
             verses.map((verse) => {
+              const hebrew = normalizeSefariaText(verse.hebrew);
+              const english = verse.english
+                ? normalizeSefariaText(verse.english)
+                : null;
               const verseComments = comments.filter(
                 (comment) => comment.verse === verse.verse,
               );
@@ -242,9 +247,11 @@ export default async function TehillimPage({ searchParams }: PageProps) {
                   <p className="text-sm font-medium text-slate-500">
                     Verse {verse.verse}
                   </p>
-                  <p className="hebrew-text mt-2 text-3xl">{verse.hebrew}</p>
-                  {verse.english ? (
-                    <p className="mt-2 text-slate-600">{verse.english}</p>
+                  <p className="hebrew-text mt-2 text-3xl">{hebrew}</p>
+                  {english ? (
+                    <p className="mt-2 whitespace-pre-line text-slate-600">
+                      {english}
+                    </p>
                   ) : null}
                   {verseComments.length > 0 ? (
                     <div className="mt-3 space-y-2">
