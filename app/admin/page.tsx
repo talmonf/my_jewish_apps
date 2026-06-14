@@ -8,10 +8,9 @@ import { syncAppsFromCatalog } from "@/lib/sync-apps";
 
 import {
   createUser,
+  saveUserSettings,
   setAppEnabled,
-  setUserAppAccess,
   updateDefaultAppAccess,
-  updateUserRole,
 } from "./actions";
 
 const roles = ["admin", "teacher", "student", "user"];
@@ -173,13 +172,13 @@ export default async function AdminPage() {
               key={user.id}
               className="rounded-xl border border-slate-200 p-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <h3 className="font-semibold">{user.name}</h3>
-                  <p className="text-sm text-slate-600">{user.email}</p>
-                </div>
-                <form action={updateUserRole} className="flex gap-2">
-                  <input type="hidden" name="userId" value={user.id} />
+              <form action={saveUserSettings} className="space-y-4">
+                <input type="hidden" name="userId" value={user.id} />
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold">{user.name}</h3>
+                    <p className="text-sm text-slate-600">{user.email}</p>
+                  </div>
                   <select
                     name="role"
                     defaultValue={user.role}
@@ -191,49 +190,56 @@ export default async function AdminPage() {
                       </option>
                     ))}
                   </select>
-                  <button className="rounded-lg border border-slate-300 px-3 py-1 text-sm">
-                    Save role
-                  </button>
-                </form>
-              </div>
-              <div className="mt-4 grid gap-3 md:grid-cols-2">
-                {APP_CATALOG.map((app) => {
-                  const access = userAccess.get(`${user.id}:${app.key}`);
+                </div>
 
-                  return (
-                    <form
-                      key={app.key}
-                      action={setUserAppAccess}
-                      className="flex items-center gap-3 rounded-lg bg-slate-50 p-3"
-                    >
-                      <input type="hidden" name="userId" value={user.id} />
-                      <input type="hidden" name="appKey" value={app.key} />
-                      <label className="flex flex-1 items-center gap-2 text-sm">
-                        <input
-                          name="enabled"
-                          type="checkbox"
-                          defaultChecked={Boolean(access)}
-                        />
-                        {app.name}
-                      </label>
-                      <select
-                        name="accessLevel"
-                        defaultValue={access?.accessLevel ?? "viewer"}
-                        className="rounded-lg border border-slate-300 px-2 py-1 text-sm"
+                <div className="grid gap-3 md:grid-cols-2">
+                  {APP_CATALOG.map((app) => {
+                    const access = userAccess.get(`${user.id}:${app.key}`);
+                    const appRow = appByKey.get(app.key);
+                    const globallyEnabled = appRow?.enabled ?? true;
+
+                    return (
+                      <div
+                        key={app.key}
+                        className="flex items-center gap-3 rounded-lg bg-slate-50 p-3"
                       >
-                        {accessLevels.map((level) => (
-                          <option key={level} value={level}>
-                            {level}
-                          </option>
-                        ))}
-                      </select>
-                      <button className="rounded-lg border border-slate-300 px-3 py-1 text-sm">
-                        Save
-                      </button>
-                    </form>
-                  );
-                })}
-              </div>
+                        <label className="flex flex-1 items-center gap-2 text-sm">
+                          <input
+                            name={`access:${app.key}`}
+                            type="checkbox"
+                            defaultChecked={Boolean(access)}
+                            disabled={!globallyEnabled}
+                          />
+                          <span>
+                            {app.name}
+                            {!globallyEnabled ? (
+                              <span className="ml-1 text-xs text-amber-700">
+                                (app disabled)
+                              </span>
+                            ) : null}
+                          </span>
+                        </label>
+                        <select
+                          name={`accessLevel:${app.key}`}
+                          defaultValue={access?.accessLevel ?? "viewer"}
+                          disabled={!globallyEnabled}
+                          className="rounded-lg border border-slate-300 px-2 py-1 text-sm disabled:opacity-50"
+                        >
+                          {accessLevels.map((level) => (
+                            <option key={level} value={level}>
+                              {level}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <button className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-medium text-white">
+                  Save user
+                </button>
+              </form>
             </article>
           ))}
         </div>

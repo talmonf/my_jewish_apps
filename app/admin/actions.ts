@@ -58,6 +58,42 @@ export async function updateUserRole(formData: FormData) {
   revalidatePath("/admin");
 }
 
+export async function saveUserSettings(formData: FormData) {
+  await requireAdmin();
+
+  const userId = z.string().uuid().parse(formData.get("userId"));
+  const role = z.enum(roles).parse(formData.get("role")) as UserRole;
+
+  await db.update(users).set({ role }).where(eq(users.id, userId));
+
+  for (const appKey of APP_KEYS) {
+    await ensureAppRegistered(appKey);
+    const enabled = formData.get(`access:${appKey}`) === "on";
+    const accessLevel = z.enum(accessLevels).parse(
+      formData.get(`accessLevel:${appKey}`) ?? "viewer",
+    ) as AppAccessLevel;
+
+    if (!enabled) {
+      await db
+        .delete(userAppAccess)
+        .where(
+          and(eq(userAppAccess.userId, userId), eq(userAppAccess.appKey, appKey)),
+        );
+    } else {
+      await db
+        .insert(userAppAccess)
+        .values({ userId, appKey, accessLevel })
+        .onConflictDoUpdate({
+          target: [userAppAccess.userId, userAppAccess.appKey],
+          set: { accessLevel },
+        });
+    }
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+}
+
 export async function setUserAppAccess(formData: FormData) {
   await requireAdmin();
 
@@ -89,6 +125,7 @@ export async function setUserAppAccess(formData: FormData) {
   }
 
   revalidatePath("/admin");
+  revalidatePath("/");
 }
 
 export async function updateDefaultAppAccess(formData: FormData) {
@@ -127,4 +164,5 @@ export async function setAppEnabled(formData: FormData) {
 
   await db.update(apps).set({ enabled }).where(eq(apps.key, appKey));
   revalidatePath("/admin");
+  revalidatePath("/");
 }
