@@ -50,7 +50,11 @@ export default async function AdminPage() {
 
       <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
         <h2 className="text-xl font-semibold">Create user</h2>
-        <form action={createUser} className="mt-4 grid gap-3 md:grid-cols-5">
+        <form
+          action={createUser}
+          autoComplete="off"
+          className="mt-4 grid gap-3 md:grid-cols-5"
+        >
           <input
             name="name"
             placeholder="Name"
@@ -62,6 +66,7 @@ export default async function AdminPage() {
             type="email"
             placeholder="Email"
             required
+            autoComplete="off"
             className="rounded-lg border border-slate-300 px-3 py-2"
           />
           <PasswordInput
@@ -70,6 +75,7 @@ export default async function AdminPage() {
             minLength={8}
             placeholder="Password"
             required
+            autoComplete="new-password"
           />
           <select
             name="role"

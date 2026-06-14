@@ -1,3 +1,5 @@
+import "@/envConfig";
+
 import { db } from "@/db";
 import { tehillimChapters, tehillimVerses } from "@/db/schema";
 import {
@@ -30,6 +32,10 @@ async function fetchSefariaChapter(chapter: number) {
 }
 
 async function importTehillim() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is required.");
+  }
+
   await db
     .insert(tehillimChapters)
     .values(TEHILLIM_CHAPTERS)

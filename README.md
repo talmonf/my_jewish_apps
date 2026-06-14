@@ -2,6 +2,20 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Copy `.env.example` to `.env.local` and set `DATABASE_URL`,
+`NEXTAUTH_URL`, and `NEXTAUTH_SECRET`.
+
+Prepare the database and load the local Tehillim text:
+
+```bash
+npm run db:migrate
+npm run seed
+npm run import:tehillim
+```
+
+The Tehillim page reads from the local `tehillim_verses` table. If that table
+is empty, the app will show a message asking you to run the Sefaria import.
+
 First, run the development server:
 
 ```bash

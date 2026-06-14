@@ -1,3 +1,5 @@
+import "@/envConfig";
+
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -6,6 +8,10 @@ import { APP_CATALOG } from "@/lib/app-catalog";
 import { hashPassword } from "@/lib/password";
 
 async function seed() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is required.");
+  }
+
   for (const app of APP_CATALOG) {
     await db
       .insert(apps)
