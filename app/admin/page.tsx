@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { apps, defaultAppAccess, userAppAccess, users } from "@/db/schema";
 import { requireAdmin } from "@/lib/access";
 import { APP_CATALOG } from "@/lib/app-catalog";
+import { syncAppsFromCatalog } from "@/lib/sync-apps";
 
 import {
   createUser,
@@ -18,6 +19,7 @@ const accessLevels = ["viewer", "teacher", "admin"];
 
 export default async function AdminPage() {
   await requireAdmin();
+  await syncAppsFromCatalog();
 
   const [allUsers, appRows, defaultRows, userAccessRows] = await Promise.all([
     db.select().from(users).orderBy(users.email),

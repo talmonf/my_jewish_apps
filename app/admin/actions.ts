@@ -16,6 +16,7 @@ import {
 import { requireAdmin } from "@/lib/access";
 import { APP_KEYS, type AppKey } from "@/lib/app-catalog";
 import { hashPassword } from "@/lib/password";
+import { ensureAppRegistered } from "@/lib/sync-apps";
 
 const roles = ["admin", "teacher", "student", "user"] as const;
 const accessLevels = ["viewer", "teacher", "admin"] as const;
@@ -69,6 +70,8 @@ export async function setUserAppAccess(formData: FormData) {
     formData.get("accessLevel"),
   ) as AppAccessLevel;
 
+  await ensureAppRegistered(appKey);
+
   if (!enabled) {
     await db
       .delete(userAppAccess)
@@ -99,6 +102,8 @@ export async function updateDefaultAppAccess(formData: FormData) {
     formData.get("accessLevel"),
   ) as AppAccessLevel;
 
+  await ensureAppRegistered(appKey);
+
   await db
     .insert(defaultAppAccess)
     .values({ appKey, enabled, accessLevel })
@@ -117,6 +122,8 @@ export async function setAppEnabled(formData: FormData) {
     formData.get("appKey"),
   );
   const enabled = formData.get("enabled") === "on";
+
+  await ensureAppRegistered(appKey);
 
   await db.update(apps).set({ enabled }).where(eq(apps.key, appKey));
   revalidatePath("/admin");

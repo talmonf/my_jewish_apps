@@ -3,35 +3,19 @@ import "@/envConfig";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { apps, defaultAppAccess, userAppAccess, users } from "@/db/schema";
+import { defaultAppAccess, userAppAccess, users } from "@/db/schema";
 import { APP_CATALOG } from "@/lib/app-catalog";
 import { hashPassword } from "@/lib/password";
+import { syncAppsFromCatalog } from "@/lib/sync-apps";
 
 async function seed() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required.");
   }
 
-  for (const app of APP_CATALOG) {
-    await db
-      .insert(apps)
-      .values({
-        key: app.key,
-        name: app.name,
-        description: app.description,
-        href: app.href,
-        enabled: true,
-      })
-      .onConflictDoUpdate({
-        target: apps.key,
-        set: {
-          name: app.name,
-          description: app.description,
-          href: app.href,
-          enabled: true,
-        },
-      });
+  await syncAppsFromCatalog();
 
+  for (const app of APP_CATALOG) {
     await db
       .insert(defaultAppAccess)
       .values({
