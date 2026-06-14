@@ -46,22 +46,22 @@ export async function searchYouTube(
 
   const data = (await response.json()) as YouTubeSearchResponse;
 
-  return (data.items ?? [])
-    .map((item) => {
-      const videoId = item.id?.videoId;
-      if (!videoId) {
-        return null;
-      }
+  return (data.items ?? []).flatMap((item) => {
+    const videoId = item.id?.videoId;
+    if (!videoId) {
+      return [];
+    }
 
-      return {
-        title: item.snippet?.title ?? "Untitled video",
-        url: `https://www.youtube.com/watch?v=${videoId}`,
-        source: "youtube" as const,
-        thumbnailUrl:
-          item.snippet?.thumbnails?.medium?.url ??
-          item.snippet?.thumbnails?.default?.url,
-        snippet: item.snippet?.description,
-      };
-    })
-    .filter((item): item is ExternalSearchResult => item !== null);
+    const result: ExternalSearchResult = {
+      title: item.snippet?.title ?? "Untitled video",
+      url: `https://www.youtube.com/watch?v=${videoId}`,
+      source: "youtube",
+      thumbnailUrl:
+        item.snippet?.thumbnails?.medium?.url ??
+        item.snippet?.thumbnails?.default?.url,
+      snippet: item.snippet?.description,
+    };
+
+    return [result];
+  });
 }

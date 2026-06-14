@@ -43,21 +43,21 @@ export async function searchWeb(
 
   const data = (await response.json()) as GoogleCseResponse;
 
-  return (data.items ?? [])
-    .map((item) => {
-      if (!item.link) {
-        return null;
-      }
+  return (data.items ?? []).flatMap((item) => {
+    if (!item.link) {
+      return [];
+    }
 
-      return {
-        title: item.title ?? item.link,
-        url: item.link,
-        source: "web" as const,
-        thumbnailUrl:
-          item.pagemap?.cse_thumbnail?.[0]?.src ??
-          item.pagemap?.cse_image?.[0]?.src,
-        snippet: item.snippet,
-      };
-    })
-    .filter((item): item is ExternalSearchResult => item !== null);
+    const result: ExternalSearchResult = {
+      title: item.title ?? item.link,
+      url: item.link,
+      source: "web",
+      thumbnailUrl:
+        item.pagemap?.cse_thumbnail?.[0]?.src ??
+        item.pagemap?.cse_image?.[0]?.src,
+      snippet: item.snippet,
+    };
+
+    return [result];
+  });
 }
