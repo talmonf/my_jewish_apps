@@ -1,6 +1,6 @@
 import type { AppAccessLevel } from "@/db/schema";
 
-export type AppKey = "tehillim" | "leining";
+export type AppKey = "tehillim" | "leining" | "liturgy-tunes";
 
 export type AppDefinition = {
   key: AppKey;
@@ -23,6 +23,14 @@ export const APP_CATALOG: AppDefinition[] = [
     name: "Leining",
     description: "Practice leining with teacher recordings and AI assistance.",
     href: "/leining",
+    defaultAccessLevel: "viewer",
+  },
+  {
+    key: "liturgy-tunes",
+    name: "Liturgy Tunes",
+    description:
+      "Browse liturgy tunes and search the web to find a melody from words and a recording.",
+    href: "/liturgy-tunes",
     defaultAccessLevel: "viewer",
   },
 ];

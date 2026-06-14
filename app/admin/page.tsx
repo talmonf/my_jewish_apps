@@ -45,6 +45,12 @@ export default async function AdminPage() {
           <p className="mt-1 text-slate-600">
             Manage users, app visibility, and defaults for new registrations.
           </p>
+          <Link
+            href="/admin/liturgy-tunes"
+            className="mt-3 inline-block text-sm font-medium text-sky-700 hover:text-sky-800"
+          >
+            Manage Liturgy Tunes
+          </Link>
         </div>
       </header>
 

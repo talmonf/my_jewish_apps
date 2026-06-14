@@ -33,6 +33,20 @@ export const leiningSubmissionStatusEnum = pgEnum("leining_submission_status", [
   "failed",
 ]);
 
+export const liturgyTunesLinkTypeEnum = pgEnum("liturgy_tunes_link_type", [
+  "youtube",
+  "website",
+  "audio",
+  "sheet_music",
+]);
+
+export const liturgyTunesSearchStatusEnum = pgEnum("liturgy_tunes_search_status", [
+  "submitted",
+  "searching",
+  "completed",
+  "failed",
+]);
+
 export const users = pgTable(
   "users",
   {
@@ -261,6 +275,143 @@ export const leiningAnalysisResults = pgTable("leining_analysis_results", {
     name: "leining_analysis_submission_fk",
   }).onDelete("cascade"),
 ]);
+
+export const liturgyTunesParts = pgTable(
+  "liturgy_tunes_parts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    parentId: uuid("parent_id"),
+    nameEn: text("name_en").notNull(),
+    nameHe: text("name_he").notNull(),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    service: text("service").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.parentId],
+      foreignColumns: [table.id],
+      name: "liturgy_tunes_parts_parent_fk",
+    }).onDelete("set null"),
+  ],
+);
+
+export const liturgyTunesTunes = pgTable(
+  "liturgy_tunes_tunes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    name: text("name").notNull(),
+    tradition: text("tradition"),
+    description: text("description"),
+    createdById: uuid("created_by_id"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.createdById],
+      foreignColumns: [users.id],
+      name: "liturgy_tunes_tunes_created_by_fk",
+    }).onDelete("set null"),
+  ],
+);
+
+export const liturgyTunesTuneParts = pgTable(
+  "liturgy_tunes_tune_parts",
+  {
+    tuneId: uuid("tune_id").notNull(),
+    partId: uuid("part_id").notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.tuneId, table.partId] }),
+    foreignKey({
+      columns: [table.tuneId],
+      foreignColumns: [liturgyTunesTunes.id],
+      name: "liturgy_tunes_tune_parts_tune_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.partId],
+      foreignColumns: [liturgyTunesParts.id],
+      name: "liturgy_tunes_tune_parts_part_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const liturgyTunesLinks = pgTable(
+  "liturgy_tunes_links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tuneId: uuid("tune_id").notNull(),
+    url: text("url").notNull(),
+    linkType: liturgyTunesLinkTypeEnum("link_type").notNull(),
+    label: text("label"),
+    sortOrder: integer("sort_order").default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.tuneId],
+      foreignColumns: [liturgyTunesTunes.id],
+      name: "liturgy_tunes_links_tune_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export const liturgyTunesSearchRequests = pgTable(
+  "liturgy_tunes_search_requests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id").notNull(),
+    liturgyText: text("liturgy_text").notNull(),
+    audioUrl: text("audio_url"),
+    transcript: text("transcript"),
+    partId: uuid("part_id"),
+    tradition: text("tradition"),
+    status: liturgyTunesSearchStatusEnum("status").default("submitted").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "liturgy_tunes_search_req_user_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.partId],
+      foreignColumns: [liturgyTunesParts.id],
+      name: "liturgy_tunes_search_req_part_fk",
+    }).onDelete("set null"),
+  ],
+);
+
+export const liturgyTunesSearchResults = pgTable(
+  "liturgy_tunes_search_results",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    requestId: uuid("request_id").notNull(),
+    provider: text("provider").notNull(),
+    results: jsonb("results").$type<ExternalSearchResult[]>().default([]).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.requestId],
+      foreignColumns: [liturgyTunesSearchRequests.id],
+      name: "liturgy_tunes_search_res_request_fk",
+    }).onDelete("cascade"),
+  ],
+);
+
+export type ExternalSearchResult = {
+  title: string;
+  url: string;
+  source: "youtube" | "web";
+  thumbnailUrl?: string;
+  snippet?: string;
+  relevanceScore?: number;
+};
 
 export type TehillimToken = {
   text: string;
