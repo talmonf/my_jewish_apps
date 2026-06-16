@@ -36,8 +36,8 @@ export const TEHILLIM_CHAPTERS: TehillimChapterMeta[] = Array.from(
       book: bookForChapter(chapter),
       dayOfWeek: findDivision(chapter, weekdayBreaks),
       dayOfMonth: findDivision(chapter, monthBreaks),
-      author: chapter <= 72 ? "David HaMelech" : "Attributed in the chapter",
-      title: `Tehillim ${chapter}`,
+      author: "",
+      title: `תהילים ${chapter}`,
     };
   },
 );
@@ -63,11 +63,8 @@ export const SAMPLE_TEHILLIM_VERSES = [
   },
 ];
 
-export function tokenizeHebrew(hebrew: string) {
-  const kamatzKatanExamples = ["כָּל", "חָכְמָה", "קָדְשׁ"];
+import { annotateSuperscriptionTokens } from "./superscription";
 
-  return hebrew.split(/\s+/).map((text) => ({
-    text,
-    kamatzKatan: kamatzKatanExamples.some((example) => text.includes(example)),
-  }));
+export function tokenizeHebrew(hebrew: string, verse = 1) {
+  return annotateSuperscriptionTokens(hebrew, verse);
 }

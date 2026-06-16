@@ -133,7 +133,11 @@ export const tehillimUserPreferences = pgTable("tehillim_user_preferences", {
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   fontFamily: text("font_family").default("system-hebrew").notNull(),
+  fontSize: integer("font_size").default(100).notNull(),
+  darkMode: boolean("dark_mode").default(false).notNull(),
   showKamatzKatan: boolean("show_kamatz_katan").default(true).notNull(),
+  showEnglish: boolean("show_english").default(false).notNull(),
+  showTeamim: boolean("show_teamim").default(true).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
@@ -182,16 +186,57 @@ export const tehillimComments = pgTable("tehillim_comments", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const tehillimReadSessions = pgTable("tehillim_read_sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  source: text("source").notNull(),
+  label: text("label").notNull(),
+  params: jsonb("params").$type<TehillimReadSessionParams>().notNull(),
+  reportedAt: timestamp("reported_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 export const tehillimReadLogs = pgTable("tehillim_read_logs", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
+  sessionId: uuid("session_id").references(() => tehillimReadSessions.id, {
+    onDelete: "set null",
+  }),
   chapter: integer("chapter").notNull(),
   quantity: integer("quantity").default(1).notNull(),
   source: text("source").default("single").notNull(),
   readAt: timestamp("read_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const tehillimPhraseBreaks = pgTable(
+  "tehillim_phrase_breaks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    chapter: integer("chapter").notNull(),
+    verse: integer("verse").notNull(),
+    afterWordIndex: integer("after_word_index").notNull(),
+    breakType: text("break_type").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("tehillim_phrase_breaks_unique").on(
+      table.userId,
+      table.chapter,
+      table.verse,
+      table.afterWordIndex,
+    ),
+  ],
+);
 
 export const leiningSections = pgTable("leining_sections", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -413,10 +458,23 @@ export type ExternalSearchResult = {
   relevanceScore?: number;
 };
 
+export type TehillimTokenRole = "author" | "instrument" | "normal";
+
 export type TehillimToken = {
   text: string;
   kamatzKatan?: boolean;
+  role?: TehillimTokenRole;
 };
+
+export type TehillimReadSessionParams =
+  | { chapter: number }
+  | { startChapter: number; endChapter: number }
+  | { book: number }
+  | { weekday: number }
+  | { monthDay: number }
+  | { monthDayStart: number; monthDayEnd: number };
+
+export type TehillimPhraseBreakType = "newline" | "tab";
 
 export type LeiningIssue = {
   type: "missed_word" | "extra_word" | "pronunciation" | "timing";

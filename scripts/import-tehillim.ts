@@ -64,7 +64,7 @@ async function importTehillim() {
     .values(
       verses.map((verse) => ({
         ...verse,
-        tokens: tokenizeHebrew(verse.hebrew),
+        tokens: tokenizeHebrew(verse.hebrew, verse.verse),
       })),
     )
     .onConflictDoUpdate({

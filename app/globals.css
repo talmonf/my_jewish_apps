@@ -23,3 +23,91 @@ body {
   font-family: "Times New Roman", "Noto Serif Hebrew", "SBL Hebrew", serif;
   line-height: 2.1;
 }
+
+.tehillim-font-large-clear {
+  direction: rtl;
+  font-family: "Noto Serif Hebrew", "Arial Hebrew", "David Libre", serif;
+  line-height: 2.2;
+  letter-spacing: 0.02em;
+}
+
+.tehillim-font-sbl {
+  direction: rtl;
+  font-family: "SBL Hebrew", "Times New Roman", serif;
+  line-height: 2.1;
+}
+
+.tehillim-author {
+  background-color: rgb(224 242 254);
+  border-radius: 0.25rem;
+  padding-inline: 0.125rem;
+}
+
+.tehillim-instrument {
+  background-color: rgb(255 237 213);
+  border-radius: 0.25rem;
+  padding-inline: 0.125rem;
+}
+
+.tehillim-kamatz-katan {
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 0.2em;
+}
+
+.tehillim-word-highlight {
+  background-color: rgb(254 249 195);
+  border-radius: 0.25rem;
+}
+
+.tehillim-phrase-tab {
+  display: inline-block;
+  margin-inline-start: 2rem;
+}
+
+.tehillim-dark {
+  --tehillim-bg: #0f172a;
+  --tehillim-card: #1e293b;
+  --tehillim-text: #f8fafc;
+  --tehillim-muted: #94a3b8;
+  --tehillim-border: #334155;
+}
+
+.tehillim-shell {
+  background: #f1f5f9;
+  color: #0f172a;
+  min-height: 100vh;
+}
+
+.tehillim-shell.tehillim-dark {
+  background: var(--tehillim-bg);
+  color: var(--tehillim-text);
+}
+
+.tehillim-header {
+  background: #2563eb;
+  color: white;
+}
+
+.tehillim-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+
+.tehillim-dark .tehillim-card {
+  background: var(--tehillim-card);
+  border-color: var(--tehillim-border);
+}
+
+.tehillim-btn {
+  background: #334155;
+  color: white;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.tehillim-dark .tehillim-btn {
+  background: #475569;
+}
+
