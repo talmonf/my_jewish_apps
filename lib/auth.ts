@@ -12,9 +12,23 @@ const credentialsSchema = z.object({
   password: z.string().min(1),
 });
 
+const DEFAULT_SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 2; // 2 days
+const sessionMaxAgeSecondsEnv = Number(
+  process.env.NEXTAUTH_SESSION_MAX_AGE_SECONDS,
+);
+const sessionMaxAgeSeconds =
+  Number.isFinite(sessionMaxAgeSecondsEnv) &&
+  sessionMaxAgeSecondsEnv > 0 &&
+  Number.isSafeInteger(sessionMaxAgeSecondsEnv)
+    ? sessionMaxAgeSecondsEnv
+    : DEFAULT_SESSION_MAX_AGE_SECONDS;
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
+    // Idle timeout: if the user isn't making requests for longer than this,
+    // NextAuth will treat the session as expired and require re-login.
+    maxAge: sessionMaxAgeSeconds,
   },
   pages: {
     signIn: "/login",

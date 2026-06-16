@@ -4,6 +4,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 Copy `.env.example` to `.env.local` and set `DATABASE_URL`,
 `NEXTAUTH_URL`, and `NEXTAUTH_SECRET`.
+Optionally, set `NEXTAUTH_SESSION_MAX_AGE_SECONDS` to control how long users stay logged in without activity (defaults to 2 days).
 
 Prepare the database and load the local Tehillim text:
 
